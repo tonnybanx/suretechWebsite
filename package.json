@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "tailwindcss": "^3.4.17"
+  },
+  "name": "suretech",
+  "version": "1.0.0",
+  "description": "",
+  "main": "tailwind.config.js",
+  "devDependencies": {},
+  "scripts": {
+    "build": "npx tailwindcss -i ./src/input.css -o ./public/style.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
