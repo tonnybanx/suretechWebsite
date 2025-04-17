@@ -1,3 +1,21 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/7a97402827.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="flex h-full">
+        <?php include 'dashboard_sidebar.php'; ?>
+       <div class="flex-grow">
+        <?php include 'dashboard_topbar.php'; ?>
+       <div class="p-6 max-w-6xl w-full ">
+
 <div class="w-full px-6" >
         <h1 class=" text-xl font-medium">Account settings</h1>
         
@@ -40,3 +58,11 @@
             <button class="bg-blue-400 text-white px-6 py-2 rounded hover:bg-blue-500">Update</button>
         </div>
     </div>
+       </div>
+
+    </div>
+</div>
+
+
+</body>
+</html>

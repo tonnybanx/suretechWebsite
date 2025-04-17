@@ -1,120 +1,118 @@
-<div class="w-full h-full" id="aboutElement">
-    
 
-    <script>
-      function openModal() {
-            document.getElementById("aboutModal").classList.remove("hidden");
-            document.getElementById("overlay").classList.remove("hidden");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/7a97402827.js" crossorigin="anonymous"></script>
 
-        }
-        
-        function setActiveTab(tab){
-          updateTabStyles(tab);
-          hideContent();
-          const mypage = document.getElementById(tab);
-         mypage.classList.remove("hidden");
+     <style>
+    .edit-button {
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .editable-container:hover .edit-button {
+      opacity: 1;
+    }
+    .editable-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+  <script>
+    function makeEditable(id, btnId) {
+      const elem = document.getElementById(id);
+      const btn = document.getElementById(btnId);
+      if (elem.isContentEditable) {
+        elem.contentEditable = false;
+        btn.textContent = 'Edit';
+      } else {
+        elem.contentEditable = true;
+        btn.textContent = 'Save';
 
-          
-        }
-        function hideContent() {
-            var container = document.getElementById('about_container');
-            var children = container.children;
+        // Move cursor to the end without selecting text
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(elem);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
 
-            // Hide each child
-            for (var i = 0; i < children.length; i++) {
-                children[i].classList.add('hidden');
-            }
-        }
+        elem.focus();
+      }
+    }
+  </script>
+</head>
+<body>
 
-      function updateTabStyles(activeTab) {
-            document.querySelectorAll(".tab-btn").forEach(button => {
-                button.classList.remove("border-b-2", "border-blue-500", "text-blue-500");
-                button.classList.add("text-gray-600");
-            });
-            
-            document.getElementById(`tab-${activeTab}`).classList.add("border-b-2", "border-blue-500", "text-blue-500");
-        }
+    <div class="flex h-full">
+        <?php include 'dashboard_sidebar.php'; ?>
+       <div class="flex-grow">
+        <?php include 'dashboard_topbar.php'; ?>
 
-    </script>
- <!-- editing the content of a Project -->
-    
-    <div id="aboutModal" class="hidden fixed inset-0 flex items-center justify-center z-20">
-       <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
-        <h2 class="text-xl font-medium mb-4">Publication</h2>
-        <form>
-            <div class="mb-4">
-                <label class="block text-gray-700">Title</label>
-                <input type="text" id="editTitle" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Enter title">
-            </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">Content</label>
-                <textarea id="editContent" class="w-full p-2 border border-gray-300 rounded-lg" rows="4" placeholder="Enter content"></textarea>
-            </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">Author</label>
-                <input type="text" id="editAuthor" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Enter author name">
-            </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">Date of Publication</label>
-                <input type="date" id="editDate" class="w-full p-2 border border-gray-300 rounded-lg">
-            </div>
-            <div class="flex justify-end space-x-2">
-                <button type="button" class="px-4 py-2 bg-gray-400 text-white rounded-lg " onclick="closeEditModal()">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg" onclick="saveChanges()">Save</button>
-            </div>
-        </form>
-    </div>
-    </div>
+        <div class="p-10 h-[90vh] overflow-auto mt-4">
+<form action="dashboard_databasemgt.php">
 
-     <!-- new project module for editing the content of a Publication -->
-    
-    <div id="Modal" class="hidden fixed inset-0 flex items-center justify-center z-20">
-       <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
-        <h2 class="text-xl font-medium mb-4">Publication</h2>
-        <form>
-            <div class="mb-4">
-                <label class="block text-gray-700">Title</label>
-                <input type="text" id="editTitle" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Enter title">
-            </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">Content</label>
-                <textarea id="editContent" class="w-full p-2 border border-gray-300 rounded-lg" rows="4" placeholder="Enter content"></textarea>
-            </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">Author</label>
-                <input type="text" id="editAuthor" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Enter author name">
-            </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">Date of Publication</label>
-                <input type="date" id="editDate" class="w-full p-2 border border-gray-300 rounded-lg">
-            </div>
-            <div class="flex justify-end space-x-2">
-                <button type="button" class="px-4 py-2 bg-gray-400 text-white rounded-lg " onclick="closeEditModal()">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg" onclick="saveChanges()">Save</button>
-            </div>
-        </form>
-    </div>
-    </div>
+<main class="w-full mx-auto mt-8 bg-white p-6 rounded-lg shadow space-y-10">
 
+    <!-- Company Overview -->
+    <section class="space-y-2 ">
+      <h2 class="text-xl font-semibold text-gray-800">Company Overview</h2>
+      <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
+        <div id="overview" name="overview" class="editable-text w-full max-w-4xl">Learn more about the diverse research groups conducting pioneering research in all areas of artificial intelligence including: Biomedicine and Health, Computational Cognitive & Neuro-science, Computational Education, Computer Vision, Empirical Machine Learning, Human-Centered and Creative AI, Natural Language Processing and Speech, Reinforcement Learning, and Statistical or Theoretical Machine Learning, in addition to blockchain Technologies</div>
+        <button type="submit" id="btnOverview" onclick="makeEditable('overview', 'btnOverview')" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
+      </div>
+    </section>
 
+    <!-- Contact Information -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold text-gray-800">Contact Information</h2>
 
-<div class="w-full h-ful">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Email</label>
+        <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
+          <div id="email"  class="flex-1 editable-text">info@company.com</div>
+          <button  type="submit" id="btnEmail" onclick="makeEditable('email', 'btnEmail')" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
+        </div>
+      </div>
 
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Phone</label>
+        <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
+          <div id="phone" class="flex-1 editable-text">+1234567890</div>
+          <button type="submit" id="btnPhone" onclick="makeEditable('phone', 'btnPhone')" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
+        </div>
+      </div>
 
-       <!-- Tab Navigation -->
-    <div class="mb-6 flex space-x-4 border-b h-[10vh] h-min-[100px]">
-                <button class="tab-btn py-2 pr-4  border-b-2 border-blue-500 text-blue-500" id="tab-overview" onclick="setActiveTab('Overview')">Overview</button>
-                <button class="tab-btn py-2 px-4 text-gray-600" id="tab-history" onclick="setActiveTab('history')">History</button>
-                <button class="tab-btn py-2 px-4 text-gray-600" id="tab-contact" onclick="setActiveTab('contact')">Contact</button>
-               
-                
-    </div>
-   
-    <!-- container with all other contents of the research tab-btn -->
-   <div id="about_container" >
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Address</label>
+        <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
+          <div id="address" class="flex-1 editable-text">123 Main Street, City, Country</div>
+          <button type="submit" id="btnAddress" onclick="makeEditable('address', 'btnAddress')" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Company History -->
+    <section class="space-y-2">
+      <h2 class="text-xl font-semibold text-gray-800">Company History</h2>
+      <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
+        <div id="history" class="w-full max-w-4xl editable-text">Sure-Tech founded in 2024, by Dr. Ann Move Oguti, continues to be a rich, intellectual and stimulating academic environment. Through multidisciplinary and multi-faculty collaborations, Sure-Tech promotes new discoveries and explores new ways to enhance human-robot interactions through AI; all while developing the next generation of researchers. Our staff of dedicated professionals provide support to our academic and research groups, functioning as Sure-Tech’s backbone. Sure-Tech staff support helps our researchers, visiting scholars and students to advance new discoveries and innovation. All these groups working together add to the depth and breadth of our cutting-edge research.</div>
+        <button type="submit" id="btnHistory" onclick="makeEditable('history', 'btnHistory')" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
+      </div>
+    </section>
+
+  </main>
+
+</form>
+        </div>
+
 
     </div>
-
 </div>
 
-</div>
+  
+</body>
+</html>

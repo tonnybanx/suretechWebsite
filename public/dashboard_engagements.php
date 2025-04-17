@@ -1,39 +1,55 @@
-<div class="w-full h-full" id="engagemntElement">
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sure-Tech</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/7a97402827.js" crossorigin="anonymous"></script>
+</head>
+<body class="bg-slate-white w-full h-screen ">
+   <div class="h-screen w-full flex">
+        <?php include 'dashboard_sidebar.php'; ?>
+    <div class="flex-grow h-screen pl-10 pr-10">
+        <?php include 'dashboard_topbar.php'; ?>
+        <!-- this is where the page is placed -->
+         <div class="w-full h-[90vh] " >
+       <!-- Tab Navigation -->
+            <div class="my-tabs mb-6 flex space-x-4 border-b h-[10vh] h-min-[100px]" id="project_tabs">
+                <button class="tab py-2 pr-4  border-b-2 border-blue-500 text-blue-500" id="tab-partnerships" onclick="updatePage('partnership','engagements',this)">Partnerships</button>
+                <button class="tab py-2 px-4  text-black" id="tab-partnerships" onclick="updatePage('subscriptions','engagements',this)">Subscriptions</button>
+               
+                
+            </div>
+   
+    <!-- container with all other contents of the research tab-btn -->
+   <div id="research-container" class="research-container   h-[80vh]" >
 
-    <script>
-      
-        function setEngagmentTab(tab){
-          updatEngagemtTab(tab);
-          hideEngagements();
-          const mypage = document.getElementById(tab);
-         mypage.classList.remove("hidden");
+    <div id="areas" class="research-page">
+        
+    </div>
+    <div id="projects" class="research-page hidden">
+        
+    </div>
 
-          
-        }
-        function hideEngagements() {
-            var container = document.getElementById('engagement_container');
-            var children = container.children;
+    <div id="publications" class="research-page hidden">
+        
+    </div>
 
-            // Hide each child
-            for (var i = 0; i < children.length; i++) {
-                children[i].classList.add('hidden');
-            }
-        }
+   </div> 
+    </div>
 
-      function updateEnagagementTab(activeTab) {
-            document.getElementById("engagment_tabs").children.forEach(button => {
-                button.classList.remove("border-b-2", "border-blue-500", "text-blue-500");
-                button.classList.add("text-gray-600");
-            });
-            
-            document.getElementById(`tab-${activeTab}`).classList.add("border-b-2", "border-blue-500", "text-blue-500");
-        }
+    </div>
 
-    </script>
- <!-- editing the content of editing engagements -->
     
-    <div id="engagementEdit" class="hidden fixed inset-0 flex items-center justify-center z-20">
+</div>
+
+
+
+ <!-- editing the content of a Project -->
+    
+    <div id="editModal" class="hidden fixed inset-0 flex items-center justify-center z-20">
        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
         <h2 class="text-xl font-medium mb-4">Publication</h2>
         <form>
@@ -63,7 +79,7 @@
 
      <!-- new project module for editing the content of a Publication -->
     
-    <div id="newEngagements" class="hidden fixed inset-0 flex items-center justify-center z-20">
+    <div id="projectModal" class="hidden fixed inset-0 flex items-center justify-center z-20">
        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
         <h2 class="text-xl font-medium mb-4">Publication</h2>
         <form>
@@ -93,24 +109,51 @@
 
 
 
+    <script>
+      function openModal() {
+            document.getElementById("projectModal").classList.remove("hidden");
+            document.getElementById("overlay").classList.remove("hidden");
 
-<div class="w-full h-full " >
-       <!-- Tab Navigation -->
-            <div class="mb-6 flex space-x-4 border-b h-[10vh] h-min-[100px]" id="engagment_tabs">
-                <button class="tab-btn py-2 pr-4  border-b-2 border-blue-500 text-blue-500" id="tab-support" onclick="setActiveTab('support')">support</button>
-                <button class="tab-btn py-2 px-4 text-gray-600" id="tab-partnerships" onclick="setActiveTab('partnerships')">Partnerships</button>
-                
-                
-            </div>
-   
-    <!-- container with all other contents of the research tab-btn -->
-   <div id="engagement_container" >
+        }
 
-
-   </div> 
+  function updatePage(activeTab,activePage,selectedTab){
+        const tabButtons = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.research-page');
+        // Hide all content
+      tabContents.forEach(content => content.classList.add('hidden'));
 
 
-    </div>
+  tabButtons.forEach(button => {
+    
+      // Remove active styles from all buttons
+      button.classList.remove('border-b-2','border-blue-500', 'text-blue-500');   
+      // Show selected tab content
+      document.getElementById(activeTab).classList.remove('hidden');
+    
+  });
+
+    // Add active styles to clicked button
+      selectedTab.classList.add('border-b-2','border-blue-500', 'text-blue-500');
+
+    }
+
+        
+       
 
 
-</div>
+        function toggleSidebar() {
+            
+            const sidebar = document.getElementById("sidebar");
+            const toggle_btn=document.getElementById("togglebutton2");
+            toggle_btn.classList.toggle("hidden");
+            sidebar.classList.toggle("hidden");
+        }
+
+       
+        
+    
+
+    </script>
+</body>
+</html>
+

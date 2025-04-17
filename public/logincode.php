@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['pswd'])) {
-             header("Location: main_dashboard.php");
+             header("Location: dashboard_home.php");
             
         } else {
            header("Location: login.php?message=Invalid username or password!&status=error"); 

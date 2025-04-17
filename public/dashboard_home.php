@@ -1,4 +1,21 @@
-<div class="p-6 max-w-6xl w-full ">
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/7a97402827.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="flex h-full">
+        <?php include 'dashboard_sidebar.php'; ?>
+       <div class="flex-grow">
+        <?php include 'dashboard_topbar.php'; ?>
+       <div class="p-6 max-w-6xl w-full ">
         <h1 class="text-3xl font-bold mb-6">Research Center Dashboard</h1>
         
         <!-- Quick Stats -->
@@ -37,3 +54,10 @@
             </ul>
         </div>
     </div>
+
+    </div>
+</div>
+
+
+</body>
+</html>
