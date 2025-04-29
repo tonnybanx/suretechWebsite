@@ -162,13 +162,53 @@
     </div>
 
 
+    <!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+    <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Deletion</h2>
+    <p class="text-gray-600 mb-4">Are you sure you want to remove this this event?</p>
+
+    <!-- Hidden Form for Deletion -->
+    <form id="deleteForm" method="POST" action="dashboard_databasemgt/manage_events.php?action=deleteEvent">
+      <input type="hidden" name="id" id="id">
+      <div class="flex justify-end gap-4">
+        <button type="button" onclick="closeDeleteModal()" class="bg-white border-blue-500 text-blue-500 px-4 py-2 rounded hover:bg-blue-500 hover:text-white">
+          Cancel
+        </button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 
     <script>
         let selectedOPtion='hackathrons';
         let selectedAction='fetchHackathrons';
 
+
+function deleteEvent(button){
+    document.getElementById("overlay").classList.remove("hidden");
+    const modal=document.getElementById('deleteModal');
+    modal.classList.remove('hidden');
+
+    const card=button.closest('.eventContainer');
+    
+    modal.querySelector('#id').value=card.querySelector('.id').textContent;
+
+    }
+    
+    function closeDeleteModal(){
+       document.getElementById("overlay").classList.add("hidden");
+       document.getElementById('deleteModal').classList.add('hidden');
+ 
+    }
+        
         fetchContent();
+
 
         function handleMenuClick(event) {
             let menu = event.currentTarget.parentElement;
@@ -176,16 +216,17 @@
         }
 
         function openModalEdit(button) {
-            const modal=document.getElementById('teamModal');
+            const modal=document.getElementById('eventsModal');
             modal.classList.remove("hidden");
             document.getElementById("overlay").classList.remove("hidden");
-            let card=button.closest('.teamContainer');
+            let card=button.closest('.eventContainer');
            
-            modal.querySelector('#firstName').value= card.querySelector('.firstName').textContent;
-            modal.querySelector('#lastName').value=card.querySelector('.lastName').textContent;
-            modal.querySelector('#privilege').value=card.querySelector('.privilege').textContent;
+            modal.querySelector('#title').value= card.querySelector('.title').textContent;
             modal.querySelector('#details').value=card.querySelector('.details').textContent;
+            modal.querySelector('#date').value=card.querySelector('.date').textContent;
+            modal.querySelector('#location').value=card.querySelector('.venue').textContent;
             modal.querySelector('#id').value= card.querySelector('.id').textContent;
+             modal.querySelector('#category').value= card.querySelector('.category').textContent;
             modal.querySelector('#imagePreview').src= card.querySelector('.image').getAttribute('src');
             modal.querySelector('#imagefile').src=card.querySelector('.image').getAttribute('src');
             modal.querySelector('#imagePreview').classList.remove('hidden');
@@ -356,9 +397,10 @@
         contentList.innerHTML = '';
         data.forEach(item => {
             contentList.innerHTML += `<!-- event -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden relative flex flex-col max-w-[400px]">
+        <div class="eventContainer bg-white shadow-md rounded-lg overflow-hidden relative flex flex-col max-w-[400px] h-[400px]">
                 <img src='dashboard_databasemgt/${item.image_path}' alt="Conference" class="image w-full h-48 object-cover">
                 <label for="id" name="id" class="id hidden">${item.id}</label>
+                <label for="category" name="category" class="category hidden">${item.category}</label>
                 <div class="absolute top-3 right-3">
                 <button class="text-gray-800 hover:text-black font-bold bg-white rounded-full" onclick="toggleMenu(event)">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 p-1" fill="currentColor" viewBox="0 0 24 24" stroke="none">
@@ -369,10 +411,10 @@
                 </button>
                 <div class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
                     <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-200" onclick="setEditAction(); openModalEdit(this); handleMenuClick(event)">Edit</a>
-                    <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event)">Delete</a>
+                    <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event); deleteEvent(this)">Delete</a>
                 </div>
             </div>
-             <div class="p-4">
+             <div class="p-4 ">
                     <h2 class="title text-xl font-semibold">${item.title}</h2>
                     <div class="dateVenue flex " >
                      <p class="date text-gray-600 text-sm mt-2 mr-2"> <i class="fa fa-calendar"></i> ${item.date} | </p>
@@ -431,7 +473,7 @@
         contentList.innerHTML = '';
         data.forEach(item => {
             contentList.innerHTML += `<!-- event -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden relative flex flex-col max-w-[400px]">
+        <div class="eventContainer bg-white shadow-md rounded-lg overflow-hidden relative flex flex-col max-w-[400px] h-[400px]">
                 <img src='dashboard_databasemgt/${item.image_path}' alt="Conference" class="image w-full h-48 object-cover">
                 <label for="id" name="id" class="id hidden">${item.id}</label>
                 <div class="absolute top-3 right-3">
@@ -444,7 +486,7 @@
                 </button>
                 <div class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
                     <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-200" onclick="setEditAction(); openModalEdit(this); handleMenuClick(event)">Edit</a>
-                    <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event)">Delete</a>
+                    <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event); deleteEvent(this)">Delete</a>
                 </div>
             </div>
              <div class="p-4">

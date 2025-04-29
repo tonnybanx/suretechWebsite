@@ -161,7 +161,7 @@ header("Location: ../dashboard_events.php?message=Added successfully &status=suc
             
 
             if ($image_path ) {
-                $stmt = $pdo->prepare("UPDATE event SET title =:title, location=:location,details=:details, image_path = :image_path, date=:date WHERE id = :id");
+                $stmt = $pdo->prepare("UPDATE events SET title =:title, location=:location,details=:details, image_path = :image_path, date=:date WHERE id = :id");
                 $stmt->execute([
                     'title' => $title,
                     'location' => $location,
@@ -173,7 +173,7 @@ header("Location: ../dashboard_events.php?message=Added successfully &status=suc
                 header("Location: ../dashboard_events.php?message=Update successful&status=successful"); 
             
             } else {
-                $stmt = $pdo->prepare("UPDATE event SET title =:title, location=:location,details=:details, date=:date WHERE id = :id");
+                $stmt = $pdo->prepare("UPDATE events SET title =:title, location=:location,details=:details, date=:date WHERE id = :id");
                 $stmt->execute([
                     'title' => $title,
                     'location' => $location,
@@ -196,7 +196,7 @@ header("Location: ../dashboard_events.php?message=Added successfully &status=suc
             
 
             if ($image_path ) {
-                $stmt = $pdo->prepare("UPDATE event SET title =:title, details=:details, image_path = :image_path WHERE id = :id");
+                $stmt = $pdo->prepare("UPDATE events SET title =:title, details=:details, image_path = :image_path WHERE id = :id");
                 $stmt->execute([
                     'title' => $title,
                     'details' => $details,
@@ -205,7 +205,7 @@ header("Location: ../dashboard_events.php?message=Added successfully &status=suc
                 ]);
                 // echo "updated";
             } else {
-                $stmt = $pdo->prepare("UPDATE event SET title =:title, details=:details  WHERE id = :id");
+                $stmt = $pdo->prepare("UPDATE events SET title =:title, details=:details  WHERE id = :id");
                 $stmt->execute([
                     'title' => $title,
                     'details' => $details,
@@ -224,7 +224,7 @@ header("Location: ../dashboard_events.php?message=Added successfully &status=suc
             $id = $_POST['id'] ?? 0;
 
             if ($id) {
-                $stmt = $pdo->prepare("DELETE FROM event WHERE id = :id");
+                $stmt = $pdo->prepare("DELETE FROM events WHERE id = :id");
                 $stmt->execute(['id' => $id]);
                 // echo "deleted";
                 header("Location: ../dashboard_events.php?message=Deleted successfully &status=successful"); 
@@ -242,6 +242,6 @@ header("Location: ../dashboard_events.php?message=Added successfully &status=suc
 } catch (PDOException $e) {
     error_log($e->getMessage());
     // echo "error". $e->getMessage();
-    header("Location: ../dashboard_events.php?message=An error occurred &status=unsuccessful"); 
+    header("Location: ../dashboard_events.php?message=An error occurred &status=unsuccessful".$e->getMessage()); 
 }
 ?>

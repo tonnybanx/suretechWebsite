@@ -1,31 +1,72 @@
 <?php
-if($_SERVER["REQUEST_METHOD"]=="POST"){
-    $myusername = $_POST["username"];
-    $email = $_POST["email"];
-    $pswd = $_POST["password"];
+$host = 'localhost';
+$dbname = 'suretech_database';
+$user = 'root';
+$pass = '';
 
-     // Hash the password (for security)
-    $hashed_password = password_hash($pswd, PASSWORD_DEFAULT);
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    
-try{
-    require_once "databaseconnection.php";
-    $query = "INSERT INTO users (username,pswd,email) VALUES (?,?,?);";
-    $statement = $pdo->prepare($query);
-    $statement->execute([$myusername, $hashed_password, $email]);
-    $pdo = null;
-    $statement = null;
+    if (isset($_POST['submit'])) {
+        $first_name = trim($_POST['first_name']);
+        $last_name = trim($_POST['last_name']);
+        $username = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $location = trim($_POST['location']);
+        $details = trim($_POST['details']);
 
-    header("Location: index.php");
-    die();
+        // Check for existing username
+        $checkUsername = $pdo->prepare("SELECT * FROM admin WHERE username = :username");
+        $checkUsername->execute([':username' => $username]);
+
+        if ($checkUsername->rowCount() > 0) {
+            header("Location: signup.php?error=" . urlencode("Username already exists. Please choose another."));
+            exit();
+        }
+
+        // Check for existing email
+        $checkEmail = $pdo->prepare("SELECT * FROM admin WHERE email = :email");
+        $checkEmail->execute([':email' => $email]);
+
+        if ($checkEmail->rowCount() > 0) {
+            header("Location: signup.php?error=" . urlencode("Email already exists. Please use another email."));
+            exit();
+        }
+
+        // Check if user is in team table with 'admin' privilege
+        $checkTeam = $pdo->prepare("SELECT * FROM team 
+            WHERE email = :email AND privilege = 'admin'");
+        $checkTeam->execute([
+            ':email' => $email
+        ]);
+
+        if ($checkTeam->rowCount() > 0) {
+            $stmt = $pdo->prepare("INSERT INTO admin (first_name, last_name, username, email, password, location, details)
+                VALUES (:first_name, :last_name, :username, :email, :password, :location, :details)");
+            $stmt->execute([
+                ':first_name' => $first_name,
+                ':last_name' => $last_name,
+                ':username' => $username,
+                ':email' => $email,
+                ':password' => $password,
+                ':location' => $location,
+                ':details' => $details
+            ]);
+
+            header("Location: login.php?signup=success");
+            exit();
+        } else {
+            header("Location: signup.php?error=" . urlencode("Access denied. You must be an admin in the team list to register here."));
+            exit();
+        }
+    } else {
+        header("Location: signup.php?error=" . urlencode("Invalid request."));
+        exit();
+    }
+} catch (PDOException $e) {
+    header("Location: signup.php?error=" . urlencode("Database error: " . $e->getMessage()));
+    exit();
 }
-catch(PDOException $e){
-    echo "Error occured: " . $e->getMessage();
-    
-    
-}
-
-}else{
-    header("Location: index.html");
-}
-
+?>

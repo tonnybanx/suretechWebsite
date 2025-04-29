@@ -1,3 +1,5 @@
+
+<!-- this is the sidebar file -->
 <aside id="sidebar" class="pl-6 pr-6  transition-all h-screen w-[300px]  bg-slate-50">
            
             <nav>

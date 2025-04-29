@@ -23,7 +23,7 @@
 
     <!-- The header images -->
     <section >
-        <div class="relative top-20" >
+        <div class="relative top-20 hidden" >
         <div class="hexagon h-[20vw] w-[20vw]  z-0 absolute top-0  right-[8vw]">
             <img src="images/tonny.jpg" class="h-[20vw] w-[20vw]">
         </div>
@@ -42,7 +42,7 @@
       </div>
 
       <!-- comments in the header section -->
-       <div class="lg:ml-52 lg:w-[35vw] lg:top-0 top-[50vw] absolute ml-10 mr-10">
+       <div class="lg:ml-52 lg:w-[35vw] lg:top-0 top-[50vw] absolute ml-10 mr-10 mt-20">
         <h1 class="mt-20 text-3xl text-black font-bold">Partner</h1>
         <p>Soroti University Research-center for Emerging Technologies works with a diverse and committed group of partners who share our commitment to global sustainability. See a sampling of our partner organizations below.</p>
         <p class="mt-10">For more information about partnership with Sure-Tech, you can email our executive director → <a href="" class="underline text-blue-700 hover:text-blue-400">annmoveoguti@sun.ac.ug</a></p>

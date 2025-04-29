@@ -92,23 +92,15 @@
           />
         </div>
         <div>
-          <label class="block font-semibold">First Name</label>
+          <label class="block font-semibold">Name</label>
           <input
             type="text"
             class="w-full border p-2 rounded-md"
-            placeholder="Enter your first name"
+            placeholder="Enter your name"
             required
           />
         </div>
-        <div>
-          <label class="block font-semibold">Last Name</label>
-          <input
-            type="text"
-            class="w-full border p-2 rounded-md"
-            placeholder="Enter your last name"
-            required
-          />
-        </div>
+        
 
         <div>
           <label class="block font-semibold">Country</label>

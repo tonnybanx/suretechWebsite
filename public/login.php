@@ -1,3 +1,13 @@
+
+<?php
+session_start();
+//If admin is already logged in, redirect to dashboard
+if (isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
+    header("Location: dashboard_home.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

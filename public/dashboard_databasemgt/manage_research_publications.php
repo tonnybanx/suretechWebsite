@@ -1,75 +1,60 @@
 <?php
 require 'database_connection.php';
 
-
-
-
 try {
     $action = $_GET['action'] ?? '';
-  switch ($action) {
 
-//adding project areas into the database
-    case 'add_publication':
-        
-            $title = $_POST['title'] ;
-            $description = $_POST['content'] ;
-            $link = $_POST['link'] ;
-            $author = $_POST['author'] ;
-            $date = $_POST['date'] ;
-        
+    switch ($action) {
+        // Add publication
+        case 'add_publication':
+            $title = $_POST['title'] ?? '';
+            $description = $_POST['content'] ?? '';
+            $link = $_POST['link'] ?? '';
+            $author = $_POST['author'] ?? '';
+            $date = $_POST['date'] ?? '';
 
-    try{
-
-
-    if ($title && $description && $link && $author && $date) {
-        $stmt = $pdo->prepare("INSERT INTO publications (title, link, description, author, publisher_date) VALUES (:title, :link, :description, :author, :date)");
-        $stmt->execute([
-            'title' => $title,
-            'link' => $link,
-            'description' =>$description,
-            'author' =>$author,
-            'date' =>$date
-        ]);
-        // echo "Content uploaded successfully.";
-    } else {
-                // echo 'Failed to add content into the database';
-    }
-    }
-    catch(PDOException $e){
-                // echo "error occurred:" . $e->getMessage();
-    }
-    
-    //header("Location: ../dashboard_research.php");
+            try {
+                if ($title && $description && $link && $author && $date) {
+                    $stmt = $pdo->prepare("INSERT INTO publications (title, link, description, author, publisher_date) VALUES (:title, :link, :description, :author, :date)");
+                    $stmt->execute([
+                        'title' => $title,
+                        'link' => $link,
+                        'description' => $description,
+                        'author' => $author,
+                        'date' => $date
+                    ]);
+                    header("Location: ../dashboard_research.php?status=success&message=Publication added successfully");
+                    exit;
+                } else {
+                    header("Location: ../dashboard_research.php?status=error&message=Missing required fields");
+                    exit;
+                }
+            } catch (PDOException $e) {
+                header("Location: ../dashboard_research.php?status=error&message=" . urlencode("Error occurred: " . $e->getMessage()));
+                exit;
+            }
             break;
 
-
-
-//fetching project areas into the database
+        // Fetch publications
         case 'fetch_publications':
-            $category = 'areas';
-        try {
-        $stmt = $pdo->prepare("SELECT id, title, description, author, link, publisher_date FROM publications "); 
-        $stmt->execute();
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode($data);
-        } catch (PDOException $e) {
-    
-        echo json_encode(["error" => "Failed to fetch data: " . $e->getMessage()]);
-    }
-    break;
+            try {
+                $stmt = $pdo->prepare("SELECT id, title, description, author, link, publisher_date FROM publications");
+                $stmt->execute();
+                $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                echo json_encode($data);
+            } catch (PDOException $e) {
+                echo json_encode(["error" => "Failed to fetch data: " . $e->getMessage()]);
+            }
+            break;
 
-
-
-//updating values of the  project areas tab
+        // Update publication
         case 'update_publication':
-            
             $id = $_POST['id'] ?? '';
-            $title = $_POST['title'] ;
-            $description = $_POST['content'] ;
-            $link = $_POST['link'] ;
-            $author = $_POST['author'] ;
-            $date = $_POST['date'] ;
-            
+            $title = $_POST['title'] ?? '';
+            $description = $_POST['content'] ?? '';
+            $link = $_POST['link'] ?? '';
+            $author = $_POST['author'] ?? '';
+            $date = $_POST['date'] ?? '';
 
             if ($id && $title && $description && $link && $author && $date) {
                 $stmt = $pdo->prepare("UPDATE publications SET description = :description, title = :title, link = :link, author = :author, publisher_date = :date WHERE id = :id");
@@ -80,42 +65,38 @@ try {
                     'link' => $link,
                     'date' => $date,
                     'author' => $author
-
                 ]);
-                // echo "updated";
+                header("Location: ../dashboard_research.php?status=success&message=Publication updated");
+                exit;
             } else {
-                // echo "invalid update input";
+                header("Location: ../dashboard_research.php?status=error&message=Missing or invalid update input");
+                exit;
             }
             break;
 
-
-
-
+        // Delete publication
         case 'delete_publication':
             $id = $_POST['id'] ?? 0;
-            
             if ($id) {
                 $stmt = $pdo->prepare("DELETE FROM publications WHERE id = :id");
                 $stmt->execute(['id' => $id]);
-                // echo "deleted";
+                header("Location: ../dashboard_research.php?status=success&message=Publication deleted");
+                exit;
             } else {
-                // echo "invalid delete input";
+                header("Location: ../dashboard_research.php?status=error&message=Invalid ID for deletion");
+                exit;
             }
-            
-
-            
             break;
 
-
-
-
+        // Default
         default:
-            echo $action;
-            break;
+            header("Location: ../dashboard_research.php?status=error&message=Invalid action: " . urlencode($action));
+            exit;
     }
 
 } catch (PDOException $e) {
     error_log($e->getMessage());
-    // echo "An error occurred";
+    header("Location: ../dashboard_research.php?status=error&message=" . urlencode("Database error: " . $e->getMessage()));
+    exit;
 }
 ?>

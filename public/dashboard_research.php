@@ -1,4 +1,12 @@
 
+<?php if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['selectedResearch'])) {
+    $_SESSION['selectedTab'] = 'areas'; 
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,7 +107,7 @@
         
     </div>
     <!-- publications in that have been included -->
-    <div class="md:columns-2 lg:columns-3  columns-1 gap-4 space-y-6  overflow-auto  p-6 h-[70vh]" id="publications-list">
+    <div class="md:columns-2 lg:columns-3 space-y-6 columns-1 gap-4 overflow-auto  p-6 h-[70vh]" id="publications-list">
 
     <!-- thi is the container for adding publication content -->
     </div>
@@ -118,7 +126,7 @@
     <div id="areaModal" class=" hidden fixed inset-0 flex items-center justify-center z-20">
        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg h-[600px] overflow-auto">
         
-        <form id="areaForm"  action='dashboard_databasemgt/manage_research_areas.php?action=add_area' method="POST" enctype="multipart/form-data">
+        <form id="areaForm"  action='dashboard_databasemgt/manage_research_areas.php?action=add_areas' method="POST" enctype="multipart/form-data">
 
             <div class="moduleTitle mb-4">
                 <label class="block text-gray-700">Title</label>
@@ -128,7 +136,7 @@
 
             <div class="moduleImage mb-4">
                 <label class="block text-gray-700">Image</label>
-                <input id="imagefile" type="file" name="image" accept="image/*" onchange="previewImage(this)" required class="w-full" />
+                <input id="imagefile" type="file" name="image" accept="image/*" onchange="previewImage(this)"  class="w-full" />
                 <!-- Image Preview -->
             <img id="imagePreview" src="#" alt="Preview" class="image hidden mt-4 w-full max-h-64 object-cover border rounded" />
             </div>
@@ -223,7 +231,62 @@
 </div>
 
 
+     <!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+    <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Deletion</h2>
+    <p class="text-gray-600 mb-4">Are you sure you want to remove this member?</p>
+
+    <!-- Hidden Form for Deletion -->
+    <form id="deleteForm" method="POST" >
+      <input type="hidden" name="id" id="id">
+      <div class="flex justify-end gap-4">
+        <button type="button" onclick="closeDeleteModal()" class="bg-white border-blue-500 text-blue-500 px-4 py-2 rounded hover:bg-blue-500 hover:text-white">
+          Cancel
+        </button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
     <script>
+
+
+function deleteCard(button,category){
+    document.getElementById("overlay").classList.remove("hidden");
+    const modal=document.getElementById('deleteModal');
+    modal.classList.remove('hidden');
+
+    const card=button.closest('#researchCard');
+    
+    modal.querySelector('#id').value=card.querySelector('.id').textContent;
+
+//set the form action for each of the categories
+    switch(category){
+        case 'areas': document.getElementById('deleteForm').action="dashboard_databasemgt/manage_research_areas.php?action=delete_area";
+        break;
+        case 'projects':document.getElementById('deleteForm').action="dashboard_databasemgt/manage_research_projects.php?action=delete_project";
+        break;
+        case 'publications': document.getElementById('deleteForm').action="dashboard_databasemgt/manage_research_publications.php?action=delete_publication";
+        break;
+        default:
+            break;
+
+      }
+
+    }
+    
+    function closeDeleteModal(){
+       document.getElementById("overlay").classList.add("hidden");
+       document.getElementById('deleteModal').classList.add('hidden');
+ 
+    }
+
     let selectedOPtion='areas';
    function toggleMenu(event) {
             let menu = event.currentTarget.nextElementSibling;
@@ -318,8 +381,9 @@
                 
                 case 'pubModal':
                   card=button.closest('.pubContainer');
-                  modal.querySelector('#title').value= card.querySelector('.title').textContent;
+                  modal.querySelector('#title').value= card.querySelector('.titlelink').textContent;
                   modal.querySelector('#id').value= card.querySelector('.id').textContent;
+                  modal.querySelector('#link').value= card.querySelector('.titlelink').textContent;
                   modal.querySelector('#content').value= card.querySelector('.description').textContent;
                   modal.querySelector('#date').value= card.querySelector('.publishedDate').textContent;
                   modal.querySelector('#editAuthor').classList.remove('hidden');
@@ -409,7 +473,7 @@
         console.log(data);  // Log the data to see if it’s coming back correctly
         contentList.innerHTML = '';
         data.forEach(item => {
-            contentList.innerHTML += `<div class="areaContainer bg-white shadow-md rounded-lg overflow-hidden relative flex flex-col max-w-[400px] justify-center items-center ">
+            contentList.innerHTML += `<div id="researchCard" class="areaContainer bg-white shadow-md rounded-lg overflow-hidden relative flex flex-col max-w-[400px] justify-center items-center ">
                 <img src="dashboard_databasemgt/${item.image_path}" alt="Conference" class="image_path w-full h-[250px] object-cover">
                 <div class="absolute top-3 right-3">
                     <button class="text-gray-800 hover:text-black font-bold bg-white rounded-full" onclick="toggleMenu(event)">
@@ -421,7 +485,7 @@
                     </button>
                     <div class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
                         <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-200" onclick="handleMenuClick(event); openModalEdit('update_areas',this,'areaModal') ">Edit</a>
-                        <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event)">Delete</a>
+                        <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event); deleteCard(this,'areas')">Delete</a>
                     </div>
                 </div>
                 <div class="p-4">
@@ -460,7 +524,7 @@ function fetchProjectContent() {
         contentList.innerHTML = '';
         data.forEach(item => {
             contentList.innerHTML += ` <!-- project card -->
-        <div class="projectContainer bg-white shadow-md rounded-lg overflow-hidden relative flex flex-col max-w-[400px]">
+        <div id="researchCard" class="projectContainer bg-white shadow-md rounded-lg overflow-auto relative flex flex-col max-w-[400px] h-[400px]">
                 <img src="dashboard_databasemgt/${item.image_path}" alt="Conference" class="image_path w-full h-48 object-cover">
                 <label name="id" class="id hidden" id="id" >${item.id}</label>
                 <div class="absolute top-3 right-3">
@@ -473,7 +537,7 @@ function fetchProjectContent() {
                 </button>
                 <div class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
                     <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-200" onclick="openModalEdit('update_project', this, 'projectModal'); handleMenuClick(event)">Edit</a>
-                    <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event)">Delete</a>
+                    <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event); deleteCard(this,'projects')">Delete</a>
                 </div>
             </div>
                 <div class="p-4">
@@ -514,33 +578,42 @@ function fetchPublicationContent() {
         contentList.innerHTML = '';
         data.forEach(item => {
             contentList.innerHTML += `<!-- publication -->
-        <div  class="pubContainer bg-white rounded-2xl shadow-md overflow-hidden p-5 relative flex flex-col max-w-[400px] h-[500px]">
-            <label class="id hidden" id="id">${item.id}</label>
-            <div class="absolute top-3 right-3">
-                <button class="text-gray-800 hover:text-black font-bold" onclick="toggleMenu(event)">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" stroke="none">
-                        <circle cx="12" cy="6" r="1.5" />
-                        <circle cx="12" cy="12" r="1.5" />
-                        <circle cx="12" cy="18" r="1.5" />
-                    </svg>
-                </button>
-                <div class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
-                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-200" onclick="openModalEdit('fetch_publications', this,'pubModal'); handleMenuClick(event)">Edit</a>
-                    <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event)">Delete</a>
-                </div>
-            </div>
-            <h2 id="pubTitle" class="text-xl font-semibold text-gray-800">
-                <a href="${item.link}" class="linktitle text-blue-600 hover:underline">${item.title}</a>
-            </h2>
-            <p id="pubContent" class="description text-gray-600 mt-2">${item.description}</p>
-            <div class="flex items-center mt-4">
-                <span class="text-sm text-gray-500">By</span>
-                <span id="pubAuthor" class="author ml-1 font-medium text-gray-700">${item.author}</span>
-            </div>
-            <div class="flex justify-between items-center mt-4">
-                <span id="pubDate" class="publishedDate text-sm text-gray-500">Published: ${item.published_date}</span>
-            </div>
+        <div id="researchCard" class="pubContainer bg-white rounded-2xl shadow-md overflow-hidden p-5 relative  max-w-[400px] h-[300px]">
+    <label class="id hidden" id="id">${item.id}</label>
+    <div class="absolute top-3 right-3">
+        <button class="text-gray-800 hover:text-black font-bold" onclick="toggleMenu(event)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" stroke="none">
+                <circle cx="12" cy="6" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="12" cy="18" r="1.5" />
+            </svg>
+        </button>
+        <div class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
+            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-200" onclick="openModalEdit('update_publication', this, 'pubModal'); handleMenuClick(event)">Edit</a>
+            <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event); deleteCard(this,'publications')">Delete</a>
         </div>
+    </div>
+
+    <h2 id="pubTitle" class="text-xl font-semibold text-gray-800">
+        <a href="${item.link}" class="linktitle text-blue-600 hover:underline">${item.title}</a>
+    </h2>
+
+   <div class="h-[100px] text-ellipsis">
+       <!-- Truncated Description -->
+    <p id="pubContent" class="description text-gray-600 mt-2 text-ellipsis">
+        ${item.description}
+    </p>
+   <div>
+
+    <div class="flex items-center mt-4">
+        <span class="text-sm text-gray-500">By</span>
+        <span id="pubAuthor" class="author ml-1 font-medium text-gray-700">${item.author}</span>
+    </div>
+    <div class="flex justify-between items-center mt-4">
+        <span id="pubDate" class="publishedDate text-sm text-gray-500">Published: ${item.publisher_date}</span>
+    </div>
+</div>
+
 
 `;
         });

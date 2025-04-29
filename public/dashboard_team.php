@@ -88,6 +88,11 @@
                 <input type="text" id="lastName" name="lastName" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Last name">
             </div>
 
+            <div class="moduleTitle mb-4">
+                <label class="block text-gray-700">Email address</label>
+                <input type="text" id="email" name="email" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Email address">
+            </div>
+
             <div class="moduleDescription mb-4">
                 <label class="block text-gray-700">Details</label>
                 <textarea  id="details" name="details" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Personal details"></textarea>
@@ -116,12 +121,48 @@
         </form>
     </div>
     </div>
+    <!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+    <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Deletion</h2>
+    <p class="text-gray-600 mb-4">Are you sure you want to remove this member?</p>
 
+    <!-- Hidden Form for Deletion -->
+    <form id="deleteForm" method="POST" action="dashboard_databasemgt/manage_team.php?action=delete">
+      <input type="hidden" name="id" id="id">
+      <div class="flex justify-end gap-4">
+        <button type="button" onclick="closeDeleteModal()" class="bg-white border-blue-500 text-blue-500 px-4 py-2 rounded hover:bg-blue-500 hover:text-white">
+          Cancel
+        </button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 
 
     <script>
 
+
+function deleteMember(button){
+    document.getElementById("overlay").classList.remove("hidden");
+    const modal=document.getElementById('deleteModal');
+    modal.classList.remove('hidden');
+
+    const card=button.closest('.teamContainer');
+    
+    modal.querySelector('#id').value=card.querySelector('.id').textContent;
+
+    }
+    
+    function closeDeleteModal(){
+       document.getElementById("overlay").classList.add("hidden");
+       document.getElementById('deleteModal').classList.add('hidden');
+ 
+    }
 
 
         let selectedOPtion='students';
@@ -140,6 +181,7 @@
            
             modal.querySelector('#firstName').value= card.querySelector('.firstName').textContent;
             modal.querySelector('#lastName').value=card.querySelector('.lastName').textContent;
+            modal.querySelector('#email').value=card.querySelector('.email').textContent;
             modal.querySelector('#privilege').value=card.querySelector('.privilege').textContent;
             modal.querySelector('#details').value=card.querySelector('.details').textContent;
             modal.querySelector('#id').value= card.querySelector('.id').textContent;
@@ -276,6 +318,7 @@
             contentList.innerHTML += `<!-- News Item 1 -->
             <div id="teamContainer" class="teamContainer shadow-lg w-60 overflow-clip rounded-lg relative">
                 <label id="id" name="id" class="id hidden">${item.id}</label>
+                <label id="email" name="email" class="email hidden">${item.email}</label>
                 <label id="privilege" class="privilege hidden">${item.privilege}</label>
                 <img src="dashboard_databasemgt/${item.image_path}" class="image h-60 w-60">
                 <div class="absolute top-3 right-3">
@@ -288,7 +331,7 @@
                 </button>
                 <div class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md z-10">
                     <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-200" onclick="setEditAction(); openModalEdit(this); handleMenuClick(event)">Edit</a>
-                    <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event)">Delete</a>
+                    <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-200" onclick="handleMenuClick(event); deleteMember(this)">Delete</a>
                 </div>
              </div>
                 <div class="p-4">

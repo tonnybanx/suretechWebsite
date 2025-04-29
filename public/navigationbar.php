@@ -70,13 +70,7 @@
                     >Partner</a
                   >
                 </li>
-                <li>
-                  <a
-                    href="support.php"
-                    class="block px-4 py-2 hover:bg-gray-200"
-                    >Support</a
-                  >
-                </li>
+                
                 <li>
                   <a
                     href="subscribe.php"
@@ -138,11 +132,7 @@
                     >History</a
                   >
                 </li>
-                <li>
-                  <a href="#" class="block px-4 py-2 hover:bg-gray-200"
-                    >Overview</a
-                  >
-                </li>
+                
                 <li>
                   <a href="contact.php" class="block px-4 py-2 hover:bg-gray-200"
                     >Contact</a
