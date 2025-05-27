@@ -36,7 +36,8 @@
             if ($conferences) {
                 foreach ($conferences as $conf) {
                     $image = htmlspecialchars($conf['image_path']);
-                    $date = htmlspecialchars($conf['date']);
+                    // Format the date to show only the date (Y-m-d) without time
+                    $date = (new DateTime($conf['date']))->format('Y-m-d');
                     $location = htmlspecialchars($conf['location']);
                     $details = htmlspecialchars($conf['details']);
                     $title = htmlspecialchars($conf['title']);
@@ -52,7 +53,6 @@
                                     <i class='fa-solid fa-location-dot ml-2 mr-1 text-blue-500'></i> $location
                                 </p>
                                 <p class='mt-4 text-gray-700'>$details</p>
-                                <a href='#' class='block mt-4 text-blue-600 font-semibold hover:underline'>Learn More →</a>
                             </div>
                         </div>
                     ";

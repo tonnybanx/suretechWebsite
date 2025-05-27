@@ -1,17 +1,27 @@
 <?php
+// Start session at the very beginning
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include database connection
 include 'dashboard_databasemgt/database_connection.php';
 
+// Redirect to login if admin session is not set
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+
 // Fetch company data (assuming a single row)
-try{
-$stmt = $pdo->query("SELECT * FROM about LIMIT 1");
-$company = $stmt->fetch(PDO::FETCH_ASSOC);
+try {
+    $stmt = $pdo->query("SELECT * FROM about LIMIT 1");
+    $company = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Handle error appropriately (e.g., log it, show a user-friendly message)
+    $error = "Database error: " . $e->getMessage();
 }
-catch(PDOException $e){
-  
-}
-
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +47,7 @@ catch(PDOException $e){
 
   <script>
     function makeEditable(id, btnId, event) {
+_send_message_
       event.preventDefault(); // prevent form from submitting by default
 
       const elem = document.getElementById(id);
@@ -76,6 +87,9 @@ catch(PDOException $e){
 
       <div class="p-10 h-[90vh] overflow-auto mt-4">
         <main class="w-full mx-auto mt-8 bg-white p-6 rounded-lg shadow space-y-10">
+          <?php if (isset($error)): ?>
+            <div class="text-red-600"><?php echo htmlspecialchars($error); ?></div>
+          <?php endif; ?>
 
           <!-- Company Name -->
           <section class="space-y-2">
@@ -84,7 +98,7 @@ catch(PDOException $e){
               <input type="hidden" name="field" value="name" />
               <input type="hidden" name="value" id="nameInput" />
               <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
-                <div id="name" class="editable-text w-full max-w-4xl"><?= htmlspecialchars($company['name']) ?></div>
+                <div id="name" class="editable-text w-full max-w-4xl"><?php echo htmlspecialchars($company['name']); ?></div>
                 <button type="button" id="btnName" data-input="nameInput" onclick="makeEditable('name', 'btnName', event)" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
               </div>
             </form>
@@ -97,7 +111,7 @@ catch(PDOException $e){
               <input type="hidden" name="field" value="overview" />
               <input type="hidden" name="value" id="overviewInput" />
               <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
-                <div id="overview" class="editable-text w-full max-w-4xl"><?= htmlspecialchars($company['overview']) ?></div>
+                <div id="overview" class="editable-text w-full max-w-4xl"><?php echo htmlspecialchars($company['overview']); ?></div>
                 <button type="button" id="btnOverview" data-input="overviewInput" onclick="makeEditable('overview', 'btnOverview', event)" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
               </div>
             </form>
@@ -113,7 +127,7 @@ catch(PDOException $e){
               <input type="hidden" name="value" id="emailInput" />
               <label class="block text-sm font-medium text-gray-700">Email</label>
               <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
-                <div id="email" class="editable-text flex-1"><?= htmlspecialchars($company['email']) ?></div>
+                <div id="email" class="editable-text flex-1"><?php echo htmlspecialchars($company['email']); ?></div>
                 <button type="button" id="btnEmail" data-input="emailInput" onclick="makeEditable('email', 'btnEmail', event)" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
               </div>
             </form>
@@ -124,7 +138,7 @@ catch(PDOException $e){
               <input type="hidden" name="value" id="phoneInput" />
               <label class="block text-sm font-medium text-gray-700">Phone</label>
               <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
-                <div id="phone" class="editable-text flex-1"><?= htmlspecialchars($company['telephone']) ?></div>
+                <div id="phone" class="editable-text flex-1"><?php echo htmlspecialchars($company['telephone']); ?></div>
                 <button type="button" id="btnPhone" data-input="phoneInput" onclick="makeEditable('phone', 'btnPhone', event)" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
               </div>
             </form>
@@ -135,7 +149,7 @@ catch(PDOException $e){
               <input type="hidden" name="value" id="addressInput" />
               <label class="block text-sm font-medium text-gray-700">Address</label>
               <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
-                <div id="address" class="editable-text flex-1"><?= htmlspecialchars($company['location']) ?></div>
+                <div id="address" class="editable-text flex-1"><?php echo htmlspecialchars($company['location']); ?></div>
                 <button type="button" id="btnAddress" data-input="addressInput" onclick="makeEditable('address', 'btnAddress', event)" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
               </div>
             </form>
@@ -148,7 +162,7 @@ catch(PDOException $e){
               <input type="hidden" name="field" value="history" />
               <input type="hidden" name="value" id="historyInput" />
               <div class="flex items-start justify-between border rounded bg-gray-50 p-3 editable-container">
-                <div id="history" class="editable-text w-full max-w-4xl"><?= htmlspecialchars($company['history']) ?></div>
+                <div id="history" class="editable-text w-full max-w-4xl"><?php echo htmlspecialchars($company['history']); ?></div>
                 <button type="button" id="btnHistory" data-input="historyInput" onclick="makeEditable('history', 'btnHistory', event)" class="text-blue-600 hover:underline ml-3 edit-button">Edit</button>
               </div>
             </form>

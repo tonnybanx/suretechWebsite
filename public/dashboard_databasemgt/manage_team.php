@@ -1,119 +1,145 @@
 <?php
-require 'database_connection.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-function getImagePath(){
-    $uploadDir = 'images/';
-    $targetFile = '';
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-        $fileName = basename($_FILES['image']['name']);
-        $filePath = $uploadDir . $fileName;
+include 'database_connection.php';
 
-        if (file_exists($filePath)) {
-            $targetFile = $filePath;
-        } else {
-            $targetFile = $uploadDir . uniqid() . "_" . $fileName;
-            move_uploaded_file($_FILES['image']['tmp_name'], $targetFile);
-        }
+// Redirect to login if admin session is not set
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
+    header('Location: ../login.php');
+    exit;
+}
+
+// Get the action and tab
+$action = isset($_GET['action']) ? $_GET['action'] : '';
+$tab = isset($_POST['tab']) ? $_POST['tab'] : (isset($_GET['tab']) ? $_GET['tab'] : 'students');
+
+// Validate tab
+$validTabs = ['students', 'staff'];
+if (!in_array($tab, $validTabs)) {
+    $tab = 'students';
+}
+
+function redirectWithMessage($message, $status, $tab) {
+    header("Location: ../dashboard_team.php?tab=" . urlencode($tab) . "&message=" . urlencode($message) . "&status=" . urlencode($status));
+    exit;
+}
+
+function deleteImage($pdo, $id) {
+    $stmt = $pdo->prepare("SELECT image_path FROM team WHERE id = ?");
+    $stmt->execute([$id]);
+    $record = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($record && !empty($record['image_path']) && file_exists("../dashboard_databasemgt/" . $record['image_path'])) {
+        unlink("../dashboard_databasemgt/" . $record['image_path']);
     }
-    return $targetFile;
 }
 
 try {
-    $action = $_GET['action'] ?? '';
-
     switch ($action) {
         case 'addStudent':
         case 'addStaff':
-            $firstName = $_POST['firstName'];
-            $lastName = $_POST['lastName'];
-            $details = $_POST['details'];
-            $email = $_POST['email'];
-            $privilege = $_POST['privilege'];
-            $imagePath = getImagePath();
-            $category = $action === 'addStudent' ? 'student' : 'staff';
+            $category = ($action === 'addStudent') ? 'student' : 'staff';
+            $firstName = trim($_POST['firstName'] ?? '');
+            $lastName = trim($_POST['lastName'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $details = trim($_POST['details'] ?? '');
+            $privilege = trim($_POST['privilege'] ?? 'user');
 
-            if ($firstName && $lastName && $details && $imagePath) {
-                $stmt = $pdo->prepare("INSERT INTO team (image_path, first_name, last_name, details, category, privilege, email) VALUES (:imagePath, :firstName, :lastName, :details, :category, :privilege, :email)");
-                $stmt->execute([
-                    'firstName' => $firstName,
-                    'lastName' => $lastName,
-                    'imagePath' => $imagePath,
-                    'category' => $category,
-                    'details' => $details,
-                    'privilege' => $privilege,
-                    'email' => $email
-                ]);
-                header("Location: ../dashboard_team.php?message=Successfully added $category&status=successful");
-            } else {
-                header("Location: ../dashboard_team.php?message=Missing fields in form&status=unsuccessful");
+            if (empty($firstName) || empty($lastName) || empty($email) || empty($details)) {
+                redirectWithMessage("All fields are required.", "error", $tab);
             }
-            break;
 
-        case 'fetchStudents':
-        case 'fetchStaff':
-            $category = $action === 'fetchStudents' ? 'student' : 'staff';
-            $stmt = $pdo->prepare("SELECT id, first_name, last_name, image_path, details, privilege, email FROM team WHERE category = :category");
-            $stmt->execute(['category' => $category]);
-            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            echo json_encode($data);
+            // Handle image upload
+            $imagePath = '';
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = '../dashboard_databasemgt/uploads/team/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $imageName = uniqid() . '_' . basename($_FILES['image']['name']);
+                $imagePath = 'uploads/team/' . $imageName;
+                if (!move_uploaded_file($_FILES['image']['tmp_name'], "../dashboard_databasemgt/" . $imagePath)) {
+                    redirectWithMessage("Failed to upload image.", "error", $tab);
+                }
+            } else {
+                redirectWithMessage("Image is required.", "error", $tab);
+            }
+
+            $stmt = $pdo->prepare("
+                INSERT INTO team (first_name, last_name, email, details, privilege, image_path, category)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([$firstName, $lastName, $email, $details, $privilege, $imagePath, $category]);
+            redirectWithMessage("Team member added successfully.", "success", $tab);
             break;
 
         case 'editStudent':
         case 'editStaff':
-            $id = $_POST['id'] ?? '';
-            $firstName = $_POST['firstName'] ?? '';
-            $lastName = $_POST['lastName'] ?? '';
-            $details = $_POST['details'] ?? '';
-            $email = $_POST['email'] ?? '';
-            $privilege = $_POST['privilege'] ?? '';
-            $image_path = getImagePath();
+            $category = ($action === 'editStudent') ? 'student' : 'staff';
+            $id = trim($_POST['id'] ?? '');
+            $firstName = trim($_POST['firstName'] ?? '');
+            $lastName = trim($_POST['lastName'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $details = trim($_POST['details'] ?? '');
+            $privilege = trim($_POST['privilege'] ?? 'user');
 
-            if ($image_path) {
-                $stmt = $pdo->prepare("UPDATE team SET first_name = :firstName, last_name = :lastName, details = :details, image_path = :image_path, privilege = :privilege, email = :email WHERE id = :id");
-                $stmt->execute([
-                    'firstName' => $firstName,
-                    'lastName' => $lastName,
-                    'details' => $details,
-                    'image_path' => $image_path,
-                    'privilege' => $privilege,
-                    'email' => $email,
-                    'id' => $id
-                ]);
-            } else {
-                $stmt = $pdo->prepare("UPDATE team SET first_name = :firstName, last_name = :lastName, details = :details, privilege = :privilege, email = :email WHERE id = :id");
-                $stmt->execute([
-                    'firstName' => $firstName,
-                    'lastName' => $lastName,
-                    'details' => $details,
-                    'privilege' => $privilege,
-                    'email' => $email,
-                    'id' => $id
-                ]);
+            if (empty($id) || empty($firstName) || empty($lastName) || empty($email) || empty($details)) {
+                redirectWithMessage("All fields are required.", "error", $tab);
             }
-            header("Location: ../dashboard_team.php?message=Successfully updated&status=successful");
+
+            // Check if a new image is uploaded
+            $imagePath = null;
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                // Delete old image
+                deleteImage($pdo, $id);
+
+                // Upload new image
+                $uploadDir = '../dashboard_databasemgt/uploads/team/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $imageName = uniqid() . '_' . basename($_FILES['image']['name']);
+                $imagePath = 'uploads/team/' . $imageName;
+                if (!move_uploaded_file($_FILES['image']['tmp_name'], "../dashboard_databasemgt/" . $imagePath)) {
+                    redirectWithMessage("Failed to upload new image.", "error", $tab);
+                }
+            }
+
+            // Prepare update query
+            $sql = "UPDATE team SET first_name = ?, last_name = ?, email = ?, details = ?, privilege = ?, category = ?";
+            $params = [$firstName, $lastName, $email, $details, $privilege, $category];
+            if ($imagePath) {
+                $sql .= ", image_path = ?";
+                $params[] = $imagePath;
+            }
+            $sql .= " WHERE id = ?";
+            $params[] = $id;
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            redirectWithMessage("Team member updated successfully.", "success", $tab);
             break;
 
         case 'delete':
-            $id = $_POST['id'] ?? 0;
-
-            if ($id) {
-                $stmt = $pdo->prepare("DELETE FROM team WHERE id = :id");
-                $stmt->execute(['id' => $id]);
-                header("Location: ../dashboard_team.php?message=Deleted successfully&status=successful");
-            } else {
-                header("Location: ../dashboard_team.php?message=Invalid ID&status=unsuccessful");
+            $id = trim($_POST['id'] ?? '');
+            if (empty($id)) {
+                redirectWithMessage("Invalid team member ID.", "error", $tab);
             }
+
+            // Delete image
+            deleteImage($pdo, $id);
+
+            // Delete record
+            $stmt = $pdo->prepare("DELETE FROM team WHERE id = ?");
+            $stmt->execute([$id]);
+            redirectWithMessage("Team member deleted successfully.", "success", $tab);
             break;
 
         default:
-            header("Location: ../dashboard_team.php?message=Invalid action&status=unsuccessful");
-            break;
+            redirectWithMessage("Invalid action.", "error", $tab);
     }
 } catch (PDOException $e) {
-    error_log($e->getMessage());
-    header("Location: ../dashboard_team.php?message=Error: " . urlencode($e->getMessage()) . "&status=unsuccessful");
+    redirectWithMessage("Database error: " . $e->getMessage(), "error", $tab);
 }
 ?>

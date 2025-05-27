@@ -15,6 +15,29 @@ $events = $pdo->query("SELECT * FROM events WHERE category = 'news' ORDER BY id 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Soroti University Research Center</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Modal Animation */
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal-content {
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    /* Backdrop Blur for Modern Look */
+    .modal-backdrop {
+      backdrop-filter: blur(8px);
+    }
+  </style>
 </head>
 <body class="bg-white w-full">
   <!-- Navigation Bar -->
@@ -39,9 +62,6 @@ $events = $pdo->query("SELECT * FROM events WHERE category = 'news' ORDER BY id 
         <div class="hexagon lg:h-72 lg:w-72 lg:top-[170px] lg:left-96 lg:ml-16 lg:mt-0 h-[30vw] w-[30vw] absolute top-[12vw] left-[50vw] ml-4 mt-6 max-w-[300px] max-h-[300px]">
           <img src="images/programmer.jpg" class="bg-clip-padding h-[30vw] w-[30vw]" />
         </div>
-        <!-- <div class="hexagon lg:h-52 lg:w-52 lg:top-[370px] lg:left-64 lg:ml-20 lg:mt-10 h-[30vw] w-[30vw] absolute top-[35vw] left-[35vw] ml-6 mt-10 max-w-[300px] max-h-[300px]">
-          <img src="images/networking2.jpg" class="bg-clip-padding h-[30vw] w-[30vw]" />
-        </div> -->
         <div class="hexagon lg:h-72 lg:w-72 lg:top-0 lg:left-72 lg:ml-20 lg:mt-14 absolute bg-slate-100 -z-10"></div>
       </div>
     </div>
@@ -62,18 +82,75 @@ $events = $pdo->query("SELECT * FROM events WHERE category = 'news' ORDER BY id 
           <div class="bg-white p-6 shadow-md rounded-lg flex flex-col">
             <h3 class="font-bold text-lg"><?php echo $item['title']; ?></h3>
             <?php if (!empty($item['details'])): ?>
-              <p class="text-gray-600 mt-2"><?php echo $item['details']; ?></p>
+              <p class="text-gray-600 mt-2"><?php echo substr($item['details'], 0, 100); ?>...</p>
             <?php endif; ?>
-            <a href="" class="text-blue-600 font-semibold mt-3 inline-block">Read More →</a>
+            <a href="#" 
+              class="read-more text-blue-600 font-semibold mt-3 inline-block"
+              data-title="<?php echo htmlspecialchars($item['title'], ENT_QUOTES); ?>"
+              data-details="<?php echo htmlspecialchars($item['details'], ENT_QUOTES); ?>"
+              data-image="dashboard_databasemgt/<?php echo isset($item['image_path']) && $item['image_path'] !== '' ? $item['image_path'] : 'default.jpg'; ?>"
+            >
+              Read More →
+            </a>
           </div>
-          
-                   
         <?php endforeach; ?>
       </div>
     </div>
   </section>
 
+  <!-- Enhanced News Modal with Increased Height and Full-Width Image -->
+  <div id="newsModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop bg-black bg-opacity-60">
+    <div class="bg-white rounded-xl shadow-2xl w-[90%] max-w-[700px] max-h-[95vh] overflow-y-auto modal-content relative">
+      <!-- Close Button -->
+      <button id="closeModal" class="absolute top-4 right-4 text-gray-500 hover:text-red-600 transition-colors duration-200 z-10">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <!-- Modal Content -->
+      <div class="flex flex-col gap-4">
+        <img id="modalImage" src="" alt="News Image" class="w-full h-96 object-cover rounded-t-xl m-0 p-0" />
+        <div class="p-6">
+          <h3 id="modalTitle" class="text-2xl font-bold text-gray-800 text-center mb-4"></h3>
+          <p id="modalDetails" class="text-gray-600 text-base leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <?php include 'footer.php'; ?>
+
+  <!-- JavaScript -->
+  <script>
+    document.querySelectorAll('.read-more').forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const title = this.getAttribute('data-title');
+        const details = this.getAttribute('data-details');
+        const imageSrc = this.getAttribute('data-image');
+
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalDetails').innerText = details;
+        document.getElementById('modalImage').src = imageSrc;
+
+        document.getElementById('newsModal').classList.remove('hidden');
+        document.getElementById('newsModal').classList.add('flex');
+      });
+    });
+
+    document.getElementById('closeModal').addEventListener('click', function () {
+      document.getElementById('newsModal').classList.remove('flex');
+      document.getElementById('newsModal').classList.add('hidden');
+    });
+
+    document.getElementById('newsModal').addEventListener('click', function (e) {
+      if (e.target === this) {
+        this.classList.remove('flex');
+        this.classList.add('hidden');
+      }
+    });
+  </script>
 </body>
 </html>

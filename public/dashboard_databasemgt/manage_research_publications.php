@@ -3,9 +3,9 @@ require 'database_connection.php';
 
 try {
     $action = $_GET['action'] ?? '';
+    $tab = $_POST['tab'] ?? $_GET['tab'] ?? 'publications';
 
     switch ($action) {
-        // Add publication
         case 'add_publication':
             $title = $_POST['title'] ?? '';
             $description = $_POST['content'] ?? '';
@@ -23,19 +23,18 @@ try {
                         'author' => $author,
                         'date' => $date
                     ]);
-                    header("Location: ../dashboard_research.php?status=success&message=Publication added successfully");
+                    header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&status=success&message=Publication added successfully");
                     exit;
                 } else {
-                    header("Location: ../dashboard_research.php?status=error&message=Missing required fields");
+                    header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&status=error&message=Missing required fields");
                     exit;
                 }
             } catch (PDOException $e) {
-                header("Location: ../dashboard_research.php?status=error&message=" . urlencode("Error occurred: " . $e->getMessage()));
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&status=error&message=" . urlencode("Error occurred: " . $e->getMessage()));
                 exit;
             }
             break;
 
-        // Fetch publications
         case 'fetch_publications':
             try {
                 $stmt = $pdo->prepare("SELECT id, title, description, author, link, publisher_date FROM publications");
@@ -47,7 +46,6 @@ try {
             }
             break;
 
-        // Update publication
         case 'update_publication':
             $id = $_POST['id'] ?? '';
             $title = $_POST['title'] ?? '';
@@ -66,37 +64,35 @@ try {
                     'date' => $date,
                     'author' => $author
                 ]);
-                header("Location: ../dashboard_research.php?status=success&message=Publication updated");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&status=success&message=Publication updated");
                 exit;
             } else {
-                header("Location: ../dashboard_research.php?status=error&message=Missing or invalid update input");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&status=error&message=Missing or invalid update input");
                 exit;
             }
             break;
 
-        // Delete publication
         case 'delete_publication':
             $id = $_POST['id'] ?? 0;
             if ($id) {
                 $stmt = $pdo->prepare("DELETE FROM publications WHERE id = :id");
                 $stmt->execute(['id' => $id]);
-                header("Location: ../dashboard_research.php?status=success&message=Publication deleted");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&status=success&message=Publication deleted");
                 exit;
             } else {
-                header("Location: ../dashboard_research.php?status=error&message=Invalid ID for deletion");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&status=error&message=Invalid ID for deletion");
                 exit;
             }
             break;
 
-        // Default
         default:
-            header("Location: ../dashboard_research.php?status=error&message=Invalid action: " . urlencode($action));
+            header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&status=error&message=Invalid action: " . urlencode($action));
             exit;
     }
 
 } catch (PDOException $e) {
     error_log($e->getMessage());
-    header("Location: ../dashboard_research.php?status=error&message=" . urlencode("Database error: " . $e->getMessage()));
+    header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&status=error&message=" . urlencode("Database error: " . $e->getMessage()));
     exit;
 }
 ?>

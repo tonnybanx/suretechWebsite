@@ -18,7 +18,7 @@ function getImagePath() {
         } else {
             $targetFile = $uploadDir . uniqid() . "_" . $fileName;
             if (!move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-                header("Location: ../dashboard_research.php?message=Failed to upload image&status=error");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($_POST['tab'] ?? 'projects') . "&message=Failed to upload image&status=error");
                 exit;
             }
         }
@@ -29,9 +29,9 @@ function getImagePath() {
 
 try {
     $action = $_GET['action'] ?? '';
+    $tab = $_POST['tab'] ?? $_GET['tab'] ?? 'projects';
 
     switch ($action) {
-
         case 'add_project':
             $title = $_POST['areaTitle'] ?? '';
             $description = $_POST['projectDescription'] ?? '';
@@ -46,22 +46,11 @@ try {
                     'category' => $category,
                     'description' => $description
                 ]);
-                header("Location: ../dashboard_research.php?message=Added successfully&status=successful");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&message=Added successfully&status=success");
             } else {
-                header("Location: ../dashboard_research.php?message=Missing title or image&status=error");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&message=Missing title or image&status=error");
             }
             exit;
-
-        case 'fetch_projects':
-            try {
-                $stmt = $pdo->prepare("SELECT id, title, image_path, description FROM projects WHERE category = :category");
-                $stmt->execute(['category' => 'projects']);
-                $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                echo json_encode($data);
-            } catch (PDOException $e) {
-                echo json_encode(["error" => "Failed to fetch data: " . $e->getMessage()]);
-            }
-            break;
 
         case 'update_project':
             $title = $_POST['areaTitle'] ?? '';
@@ -70,7 +59,17 @@ try {
             $imagePath = getImagePath();
 
             if ($id && $title) {
+                // Fetch original image path
+                $stmt = $pdo->prepare("SELECT image_path FROM projects WHERE id = :id");
+                $stmt->execute(['id' => $id]);
+                $originalImage = $stmt->fetchColumn();
+
+                // Update database
                 if ($imagePath) {
+                    // Delete original image if a new one is uploaded
+                    if ($originalImage && file_exists($originalImage)) {
+                        unlink($originalImage);
+                    }
                     $stmt = $pdo->prepare("UPDATE projects SET image_path = :image_path, title = :title, description = :description WHERE id = :id");
                     $stmt->execute([
                         'title' => $title,
@@ -86,31 +85,42 @@ try {
                         'id' => $id
                     ]);
                 }
-                header("Location: ../dashboard_research.php?message=Updated successfully&status=successful");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&message=Updated successfully&status=success");
             } else {
-                header("Location: ../dashboard_research.php?message=Invalid update input&status=error");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&message=Invalid update input&status=error");
             }
             exit;
 
         case 'delete_project':
             $id = $_POST['id'] ?? 0;
             if ($id) {
+                // Fetch image path to delete
+                $stmt = $pdo->prepare("SELECT image_path FROM projects WHERE id = :id");
+                $stmt->execute(['id' => $id]);
+                $imagePath = $stmt->fetchColumn();
+
+                // Delete image file
+                if ($imagePath && file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+
+                // Delete database record
                 $stmt = $pdo->prepare("DELETE FROM projects WHERE id = :id");
                 $stmt->execute(['id' => $id]);
-                header("Location: ../dashboard_research.php?message=Deleted successfully&status=successful");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&message=Deleted successfully&status=success");
             } else {
-                header("Location: ../dashboard_research.php?message=Invalid delete ID&status=error");
+                header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&message=Invalid delete ID&status=error");
             }
             exit;
 
         default:
-            header("Location: ../dashboard_research.php?message=Unknown action requested&status=error");
+            header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&message=Unknown action requested&status=error");
             exit;
     }
 
 } catch (PDOException $e) {
     error_log($e->getMessage());
-    header("Location: ../dashboard_research.php?message=An error occurred&status=unsuccessful");
+    header("Location: ../dashboard_research.php?tab=" . urlencode($tab) . "&message=An error occurred&status=error");
     exit;
 }
 ?>
